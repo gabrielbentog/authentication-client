@@ -59,19 +59,15 @@ export async function loginAction(prevState: any, formData: FormData) {
     const responseData = await response.json();
 
     // 4. Verificar se a API retornou um token (ajuste 'responseData.token' conforme necessário)
-    if (responseData && responseData.token) {
+    if (responseData && responseData.data.authToken) {
       // Armazenar o token em um cookie HTTPOnly para segurança
-      (await cookies()).set("authToken", responseData.token, { // Nome do cookie: 'authToken' (exemplo)
+      (await cookies()).set("authToken", responseData.data.authToken, { // Nome do cookie: 'authToken' (exemplo)
         httpOnly: true, // Impede acesso via JavaScript no cliente
         secure: process.env.NODE_ENV === "production", // Enviar apenas via HTTPS em produção
-        path: "/", // Cookie acessível em todo o site
+        path: "/",
         sameSite: "lax", // Proteção contra CSRF
         // maxAge: 60 * 60 * 24 * 7, // Opcional: Tempo de vida do cookie (ex: 7 dias em segundos)
       });
-
-      // 5. Redirecionar para o dashboard após o login bem-sucedido
-      // O redirecionamento dentro de um try/catch em Server Actions precisa ser tratado
-      // ou chamado fora se possível, mas como é o fim da action, é comum aqui.
     } else {
       // Se a API não retornou o token esperado, mesmo com status OK
       return {
@@ -90,5 +86,5 @@ export async function loginAction(prevState: any, formData: FormData) {
 
   // O redirecionamento deve ocorrer fora do try/catch se o fluxo chegou aqui com sucesso
   // e o token foi setado.
-  redirect("/dashboard");
+  redirect("/");
 }
