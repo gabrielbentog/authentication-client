@@ -413,7 +413,7 @@ export default function LoginPage() {
                 <span className="text-sm text-slate-600 dark:text-slate-400">Lembrar de mim</span>
               </label>
               <Link
-                href="/forgot-password"
+                href="/esqueci-a-senha"
                 className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
               >
                 Esqueceu a senha?
