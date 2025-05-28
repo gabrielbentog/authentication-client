@@ -17,9 +17,19 @@ import {
   Sparkles,
   Shield,
   Zap,
+  User, // Adicionado para o campo nome
 } from "lucide-react"
 import Link from "next/link"
-import { loginAction } from "@/app/actions/auth"
+// Substitua pela sua ação de registro
+// import { loginAction } from "@/app/actions/auth"; // Ação original de login
+import { registerAction } from "@/app/actions/auth"; // Assumindo que você criará esta ação
+
+// ----- INÍCIO DOS COMPONENTES REUTILIZÁVEIS (Button, Input, Label, Alert, AlertDescription) -----
+// Mantenha os componentes Button, Input, Label, Alert e AlertDescription como no seu arquivo original.
+// Cole-os aqui ou importe-os de um arquivo de componentes compartilhados.
+// Para fins de brevidade, não os repetirei aqui, mas eles são essenciais.
+
+// Exemplo de como os componentes seriam definidos (baseado no seu código):
 
 // Button Component
 interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
@@ -87,7 +97,7 @@ interface AlertProps extends React.HTMLAttributes<HTMLDivElement> {
 
 function Alert({ className = "", variant = "default", ...props }: AlertProps) {
   const variants = {
-    default: "border-border text-foreground",
+    default: "border-border text-foreground", // Adapte as cores se necessário para sucesso
     destructive: "border-destructive/50 text-destructive dark:border-destructive [&>svg]:text-destructive",
   }
 
@@ -103,6 +113,10 @@ function Alert({ className = "", variant = "default", ...props }: AlertProps) {
 function AlertDescription({ className = "", ...props }: React.HTMLAttributes<HTMLParagraphElement>) {
   return <div className={`text-sm [&_p]:leading-relaxed ${className}`} {...props} />
 }
+
+
+// ----- FIM DOS COMPONENTES REUTILIZÁVEIS -----
+
 
 const slides = [
   {
@@ -125,15 +139,16 @@ const slides = [
   },
 ]
 
-export default function LoginPage() {
-  const [state, formAction, isPending] = useActionState(loginAction, {
+export default function SignupPage() { // Nome do componente alterado
+  const [state, formAction, isPending] = useActionState(registerAction, { // Alterado para registerAction
     message: "",
     errors: {},
   })
   const [showPassword, setShowPassword] = useState(false)
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false) // Estado para confirmar senha
   const [focusedField, setFocusedField] = useState<string | null>(null)
   const [currentSlide, setCurrentSlide] = useState(0)
-  const [floatingElementsStyles, setFloatingElementsStyles] = useState<React.CSSProperties[]>([]); // State for styles
+  const [floatingElementsStyles, setFloatingElementsStyles] = useState<React.CSSProperties[]>([]);
 
   useEffect(() => {
     const timer = setInterval(() => {
@@ -142,7 +157,6 @@ export default function LoginPage() {
     return () => clearInterval(timer)
   }, [])
 
-    // Generate styles for floating elements on client side
   useEffect(() => {
     const styles = Array(20).fill(null).map(() => ({
       left: `${Math.random() * 100}%`,
@@ -158,116 +172,73 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex">
-      {/* Left side - Hero Section */}
+      {/* Left side - Hero Section (Mantida como no original) */}
       <div className="hidden lg:flex flex-1 relative overflow-hidden">
-        {/* Animated Background */}
         <div className="absolute inset-0">
           <div
             className={`absolute inset-0 bg-gradient-to-br ${slides[currentSlide].gradient} transition-all duration-1000 ease-in-out`}
           />
-
-          {/* Floating Elements */}
-          {floatingElementsStyles.length > 0 && ( // Render only when styles are generated
+          {floatingElementsStyles.length > 0 && (
             <div className="absolute inset-0">
               {floatingElementsStyles.map((style, i) => (
                 <div
                   key={i}
                   className="absolute w-2 h-2 bg-white/20 rounded-full animate-pulse"
-                  style={style} // Apply the generated styles
+                  style={style}
                 />
               ))}
             </div>
           )}
-
-          {/* Geometric Shapes */}
           <div className="absolute top-20 left-20 w-32 h-32 border border-white/20 rounded-full animate-spin-slow" />
           <div className="absolute bottom-32 right-16 w-24 h-24 border-2 border-white/30 rotate-45 animate-pulse" />
           <div className="absolute top-1/2 left-8 w-16 h-16 bg-white/10 rounded-lg rotate-12 animate-bounce-slow" />
         </div>
-
-        {/* Content */}
         <div className="relative z-10 flex flex-col justify-center items-center text-center w-full max-w-none px-4 lg:px-12 text-white">
           <div className="relative min-h-[300px] w-full">
             {slides.map((slide, index) => {
               const Icon = slide.icon;
               const isActive = index === currentSlide;
-
               return (
                 <div
                   key={index}
-                  className={`
-                    absolute inset-0 w-full transition-opacity duration-700 ease-out
-                    ${isActive ? "opacity-100" : "opacity-0 pointer-events-none"}
-                  `}
+                  className={`absolute inset-0 w-full transition-opacity duration-700 ease-out ${isActive ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                 >
-                  {/* Ícone */}
-                  <div
-                    className={`
-                      mb-6 flex justify-center transition-all duration-700 ease-out transform
-                      ${isActive ? "opacity-100 translate-y-0 delay-100" : "opacity-0 -translate-y-4"}
-                    `}
-                  >
+                  <div className={`mb-6 flex justify-center transition-all duration-700 ease-out transform ${isActive ? "opacity-100 translate-y-0 delay-100" : "opacity-0 -translate-y-4"}`}>
                     <div className="p-4 bg-white/20 backdrop-blur-sm rounded-2xl">
                       <Icon className="w-12 h-12" />
                     </div>
                   </div>
-
-                  {/* Título */}
-                  <h2
-                    className={`
-                      text-4xl font-bold mb-4 leading-tight transition-all duration-700 ease-out transform
-                      ${isActive ? "opacity-100 translate-y-0 delay-200" : "opacity-0 -translate-y-4"}
-                    `}
-                  >
+                  <h2 className={`text-4xl font-bold mb-4 leading-tight transition-all duration-700 ease-out transform ${isActive ? "opacity-100 translate-y-0 delay-200" : "opacity-0 -translate-y-4"}`}>
                     {slide.title}
                   </h2>
-
-                  {/* Descrição */}
-                  <p
-                    className={`
-                      text-xl text-white/90 max-w-md mx-auto leading-relaxed text-left transition-all duration-700 ease-out transform
-                      ${isActive ? "opacity-100 translate-y-0 delay-[300ms]" : "opacity-0 -translate-y-4"}
-                    `}
-                  >
+                  <p className={`text-xl text-white/90 max-w-md mx-auto leading-relaxed text-left transition-all duration-700 ease-out transform ${isActive ? "opacity-100 translate-y-0 delay-[300ms]" : "opacity-0 -translate-y-4"}`}>
                     {slide.description}
                   </p>
                 </div>
               );
             })}
           </div>
-
-          {/* Navigation */}
           <div className="flex items-center space-x-4">
-            <button
-              onClick={prevSlide}
-              className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-            >
+            <button onClick={prevSlide} className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
               <ChevronLeft className="w-5 h-5" />
             </button>
-
             <div className="flex space-x-2">
               {slides.map((_, index) => (
                 <button
                   key={index}
                   onClick={() => setCurrentSlide(index)}
-                  className={`w-3 h-3 rounded-full transition-all ${
-                    index === currentSlide ? "bg-white" : "bg-white/40"
-                  }`}
+                  className={`w-3 h-3 rounded-full transition-all ${index === currentSlide ? "bg-white" : "bg-white/40"}`}
                 />
               ))}
             </div>
-
-            <button
-              onClick={nextSlide}
-              className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors"
-            >
+            <button onClick={nextSlide} className="p-2 bg-white/20 backdrop-blur-sm rounded-full hover:bg-white/30 transition-colors">
               <ChevronRight className="w-5 h-5" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Right side - Login Form */}
+      {/* Right side - Signup Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-white dark:bg-slate-900">
         <div className="w-full max-w-md space-y-8">
           {/* Header */}
@@ -277,11 +248,11 @@ export default function LoginPage() {
                 <div className="w-4 h-4 bg-gradient-to-br from-blue-600 to-purple-600 rounded-sm" />
               </div>
             </div>
-            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Bem-vindo de volta</h1>
-            <p className="text-slate-600 dark:text-slate-400">Entre na sua conta para continuar sua jornada</p>
+            <h1 className="text-3xl font-bold text-slate-900 dark:text-slate-100">Crie sua conta</h1>
+            <p className="text-slate-600 dark:text-slate-400">Cadastre-se para começar sua jornada.</p>
           </div>
 
-          {/* Social Login */}
+          {/* Social Login (Mantido, pode ser usado para registro também) */}
           <div className="space-y-3">
             <Button
               variant="outline"
@@ -299,17 +270,16 @@ export default function LoginPage() {
             </Button>
           </div>
 
-          {/* Divider */}
           <div className="relative">
             <div className="absolute inset-0 flex items-center">
               <div className="w-full border-t border-slate-200 dark:border-slate-700" />
             </div>
             <div className="relative flex justify-center text-sm">
-              <span className="px-4 bg-white dark:bg-slate-900 text-slate-500">ou continue com email</span>
+              <span className="px-4 bg-white dark:bg-slate-900 text-slate-500">ou cadastre-se com email</span>
             </div>
           </div>
 
-          {/* Login Form */}
+          {/* Signup Form */}
           <form action={formAction} className="space-y-6">
             {state.message && (
               <Alert variant={state.message.includes("sucesso") ? "default" : "destructive"} className="border-l-4">
@@ -318,6 +288,40 @@ export default function LoginPage() {
             )}
 
             <div className="space-y-4">
+              {/* Name Field */}
+              <div className="space-y-2">
+                <Label htmlFor="name" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Nome Completo
+                </Label>
+                <div className="relative group">
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === "name" ? "opacity-100" : ""}`}
+                    style={{ padding: "1px" }}
+                  >
+                    <div className="h-full w-full bg-white dark:bg-slate-900 rounded-lg" />
+                  </div>
+                  <div className="relative">
+                    <User
+                      className={`absolute left-3 top-3 h-5 w-5 transition-colors ${focusedField === "name" ? "text-blue-600" : "text-slate-400"}`}
+                    />
+                    <Input
+                      id="name"
+                      name="name"
+                      type="text"
+                      placeholder="Seu nome completo"
+                      className="pl-11 h-12 border-slate-200 dark:border-slate-700 focus:border-transparent focus:ring-2 focus:ring-blue-600"
+                      required
+                      disabled={isPending}
+                      onFocus={() => setFocusedField("name")}
+                      onBlur={() => setFocusedField(null)}
+                    />
+                  </div>
+                </div>
+                {state.errors?.name && (
+                  <p className="text-sm text-red-500 flex items-center mt-1">{state.errors.name}</p>
+                )}
+              </div>
+
               {/* Email Field */}
               <div className="space-y-2">
                 <Label htmlFor="email" className="text-sm font-medium text-slate-700 dark:text-slate-300">
@@ -372,7 +376,7 @@ export default function LoginPage() {
                       id="password"
                       name="password"
                       type={showPassword ? "text" : "password"}
-                      placeholder="Digite sua senha"
+                      placeholder="Crie uma senha forte"
                       className="pl-11 pr-11 h-12 border-slate-200 dark:border-slate-700 focus:border-transparent focus:ring-2 focus:ring-blue-600"
                       required
                       disabled={isPending}
@@ -399,26 +403,84 @@ export default function LoginPage() {
                   <p className="text-sm text-red-500 flex items-center mt-1">{state.errors.password}</p>
                 )}
               </div>
+
+              {/* Confirm Password Field */}
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700 dark:text-slate-300">
+                  Confirmar Senha
+                </Label>
+                <div className="relative group">
+                  <div
+                    className={`absolute inset-0 bg-gradient-to-r from-blue-600 to-purple-600 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 ${focusedField === "confirmPassword" ? "opacity-100" : ""}`}
+                    style={{ padding: "1px" }}
+                  >
+                    <div className="h-full w-full bg-white dark:bg-slate-900 rounded-lg" />
+                  </div>
+                  <div className="relative">
+                    <Lock
+                      className={`absolute left-3 top-3 h-5 w-5 transition-colors ${focusedField === "confirmPassword" ? "text-blue-600" : "text-slate-400"}`}
+                    />
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Confirme sua senha"
+                      className="pl-11 pr-11 h-12 border-slate-200 dark:border-slate-700 focus:border-transparent focus:ring-2 focus:ring-blue-600"
+                      required
+                      disabled={isPending}
+                      onFocus={() => setFocusedField("confirmPassword")}
+                      onBlur={() => setFocusedField(null)}
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      disabled={isPending}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5 text-slate-400" />
+                      ) : (
+                        <Eye className="h-5 w-5 text-slate-400" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+                {state.errors?.confirmPassword && (
+                  <p className="text-sm text-red-500 flex items-center mt-1">{state.errors.confirmPassword}</p>
+                )}
+              </div>
             </div>
 
-            {/* Options */}
-            <div className="flex items-center justify-between">
-              <label className="flex items-center space-x-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  name="remember"
-                  className="w-4 h-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 focus:ring-2"
-                  disabled={isPending}
-                />
-                <span className="text-sm text-slate-600 dark:text-slate-400">Lembrar de mim</span>
-              </label>
-              <Link
-                href="/forgot-password"
-                className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
-              >
-                Esqueceu a senha?
-              </Link>
+            {/* Terms and Conditions */}
+            <div className="space-y-2">
+                <div className="flex items-start space-x-2">
+                    <input
+                    id="terms"
+                    name="terms"
+                    type="checkbox"
+                    className="mt-1 h-4 w-4 text-blue-600 border-slate-300 rounded focus:ring-blue-500 focus:ring-2 disabled:opacity-50"
+                    disabled={isPending}
+                    // required // Descomente se for obrigatório
+                    />
+                    <Label htmlFor="terms" className="text-sm text-slate-600 dark:text-slate-400">
+                    Eu li e concordo com os{" "}
+                    <Link href="/terms" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
+                        Termos de Serviço
+                    </Link>{" "}
+                    e a{" "}
+                    <Link href="/privacy" className="font-medium text-blue-600 hover:underline dark:text-blue-400">
+                        Política de Privacidade
+                    </Link>
+                    .
+                    </Label>
+                </div>
+                {state.errors?.terms && (
+                  <p className="text-sm text-red-500 flex items-center mt-1">{state.errors.terms}</p>
+                )}
             </div>
+
 
             {/* Submit Button */}
             <Button
@@ -429,25 +491,25 @@ export default function LoginPage() {
               {isPending ? (
                 <>
                   <Loader2 className="mr-2 h-5 w-5 animate-spin" />
-                  Entrando...
+                  Criando conta...
                 </>
               ) : (
                 <>
-                  Entrar na conta
+                  Criar conta
                   <ArrowRight className="ml-2 h-5 w-5" />
                 </>
               )}
             </Button>
 
-            {/* Sign up link */}
+            {/* Login link */}
             <div className="text-center">
               <span className="text-sm text-slate-600 dark:text-slate-400">
-                Não tem uma conta?{" "}
+                Já tem uma conta?{" "}
                 <Link
-                  href="/registro"
+                  href="/login" // Alterado para a página de login
                   className="text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium transition-colors"
                 >
-                  Cadastre-se gratuitamente
+                  Faça login
                 </Link>
               </span>
             </div>

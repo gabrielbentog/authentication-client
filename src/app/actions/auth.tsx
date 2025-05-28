@@ -88,3 +88,112 @@ export async function loginAction(prevState: any, formData: FormData) {
   // e o token foi setado.
   redirect("/");
 }
+
+// Esquema de validação dos dados do formulário de registro
+const registerSchema = z.object({
+  name: z.string().min(3, { message: "O nome deve ter pelo menos 3 caracteres." }),
+  email: z.string().email({ message: "Formato de email inválido." }),
+  password: z.string().min(6, { message: "A senha deve ter pelo menos 6 caracteres." }),
+  confirmPassword: z.string().min(6, { message: "A confirmação da senha deve ter pelo menos 6 caracteres." }),
+  // 'terms' é enviado como 'on' por FormData quando o checkbox está marcado e tem um 'name'
+  terms: z.literal('on', {
+    errorMap: () => ({ message: "Você deve aceitar os Termos de Serviço e a Política de Privacidade." })
+  }),
+}).refine(data => data.password === data.confirmPassword, {
+  message: "As senhas não coincidem.",
+  path: ["confirmPassword"], // Associa o erro de correspondência de senha ao campo confirmPassword
+});
+
+// Interface para o estado do formulário, usada por useActionState
+interface RegisterState {
+  message: string;
+  errors?: {
+    name?: string[];
+    email?: string[];
+    password?: string[];
+    confirmPassword?: string[];
+    terms?: string[];
+    _form?: string[]; // Para erros gerais não associados a um campo específico
+  };
+  success?: boolean; // Flag para indicar sucesso, especialmente se não houver redirecionamento
+}
+
+export async function registerAction(prevState: RegisterState, formData: FormData): Promise<RegisterState> {
+  // 1. Validar os campos do formulário
+  const validatedFields = registerSchema.safeParse({
+    name: formData.get("name"),
+    email: formData.get("email"),
+    password: formData.get("password"),
+    confirmPassword: formData.get("confirmPassword"),
+    terms: formData.get("terms"),
+  });
+
+  if (!validatedFields.success) {
+    return {
+      errors: validatedFields.error.flatten().fieldErrors,
+      message: "Campos inválidos. Verifique os dados inseridos.",
+      success: false,
+    };
+  }
+
+  const { name, email, password } = validatedFields.data;
+
+  try {
+    // 2. Chamar a API para registrar o usuário
+    const response = await fetch(`${process.env.NEXT_PUBLIC_API_HOST}/api/users`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      // MODIFICAÇÃO AQUI: aninhar os dados do usuário sob a chave "user"
+      body: JSON.stringify({
+        user: {
+          name,
+          email,
+          password,
+          passwordConfirmation: validatedFields.data.confirmPassword, // Usar o valor validado
+        }
+      }),
+    });
+
+    const responseData = await response.json().catch(() => ({}));
+
+    // ... (resto do tratamento da resposta, lógica de cookie e redirect)
+    // 3. Tratar a resposta da API
+    if (!response.ok) {
+      return {
+        message: responseData.message || "Erro ao criar usuário. Tente novamente.",
+        errors: responseData.errors || { _form: [responseData.message || "Erro desconhecido retornado pela API."] },
+        success: false,
+      };
+    }
+
+    // Verifica se o header Authorization está presente na resposta
+    const authHeader = response.headers.get("Authorization");
+    if (authHeader) {
+      const token = authHeader.replace(/^Bearer\s+/i, "");
+      (await cookies()).set("authToken", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      path: "/",
+      sameSite: "lax",
+      });
+    } else {
+      return {
+      message: "Conta criada com sucesso! Você já pode fazer login.",
+      errors: {},
+      success: true,
+      };
+    }
+
+  } catch (error) {
+    console.error("Erro inesperado na registerAction:", error);
+    return {
+      message: "Algo deu errado ao tentar criar sua conta. Verifique sua conexão ou tente novamente mais tarde.",
+      errors: { _form: ["Ocorreu um problema de conexão ou no servidor. Por favor, tente mais tarde."] },
+      success: false,
+    };
+  }
+
+  redirect("/");
+}
