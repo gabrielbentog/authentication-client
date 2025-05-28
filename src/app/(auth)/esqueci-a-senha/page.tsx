@@ -117,7 +117,7 @@ async function requestPasswordResetAction(
   }
 
   const { email } = validatedFields.data;
-  const apiHost = process.env.NEXT_PUBLIC_API_HOST || "http://localhost:3001"; // Fallback para desenvolvimento
+  const apiHost = process.env.NEXT_PUBLIC_API_HOST
 
   try {
     const response = await fetch(`${apiHost}/auth/password/send_code`, {
